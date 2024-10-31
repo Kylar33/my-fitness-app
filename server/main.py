@@ -3,6 +3,7 @@ from database import SessionLocal, engine
 from sqlalchemy import text
 from model.model import Base
 from auth.auth import router as auth_router
+from routes.rutinas import router as rutinas_router
 
 app = FastAPI()
 
@@ -24,3 +25,4 @@ async def test_db():
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router, prefix="/auth")
+app.include_router(rutinas_router, prefix="/api")

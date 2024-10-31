@@ -1,8 +1,24 @@
-# models.py
-
+# Importaciones
 from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship
 from database import Base
+from pydantic import BaseModel, EmailStr
+from datetime import date
+from typing import Optional, List
+
+class Entrenador_Create(BaseModel):
+    nombre: str
+    email: EmailStr
+    password: str
+
+class Cliente_Create(BaseModel):
+    nombre: str
+    email: EmailStr
+    password: str
+
+class Login(BaseModel):
+    email: EmailStr
+    password: str
 
 # Tabla de Entrenadores
 class Entrenador(Base):
@@ -106,3 +122,26 @@ class Metrica(Base):
     rendimiento = Column(String(100))
     
     cliente = relationship("Cliente", back_populates="metricas")
+
+
+# Rutinas
+class RutinaBase(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+
+class RutinaCreate(RutinaBase):
+    pass
+
+class Rutina(RutinaBase):
+    id: int
+    entrenador_id: int
+
+    class Config:
+        orm_mode = True
+
+class RutinaClienteCreate(BaseModel):
+    cliente_id: int
+    rutina_id: int
+    fecha_inicio: date
+    fecha_fin: Optional[date] = None
+    progreso: Optional[str] = None
