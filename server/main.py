@@ -1,28 +1,24 @@
 from fastapi import FastAPI
-from database import SessionLocal, engine
-from sqlalchemy import text
-from model.model import Base
-from auth.auth import router as auth_router
-from routes.rutinas import router as rutinas_router
+from fastapi.middleware.cors import CORSMiddleware
+from routes import users, routines, nutrition
 
-app = FastAPI()
+
+app = FastAPI(title="Fitness Trainer API")
+
+# Configuración CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "API fitness ON"}
 
-@app.get("/test_db")
-async def test_db():
-    db = SessionLocal()
-    try: 
-        db.execute(text("SELECT 1"))
-        return {"message": "Database connection successful"}
-    except Exception as e:
-        return {"message": "Database connection failed", "error": str(e)}
-    finally:
-        db.close()
 
-Base.metadata.create_all(bind=engine)
-
-app.include_router(auth_router, prefix="/auth")
-app.include_router(rutinas_router, prefix="/api")
+app.include_router(users.router, prefix="/api/v1", tags=["users"])
+app.include_router(routines.router, prefix="/api/v1", tags=["routines"])
+app.include_router(nutrition.router, prefix="/api/v1", tags=["nutrition"])
