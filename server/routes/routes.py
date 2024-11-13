@@ -1,21 +1,21 @@
-import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from config.database import get_db
 from models.user import User, Trainer
-from schemas.user import UserCreate, TrainerCreate
+from schemas.user import UserCreate, TrainerCreate, Trainer as TrainerSchema
 from utils.auth import (
     verify_password,
     get_password_hash,
     create_access_token
 )
+import os
 
 router = APIRouter()
 
-@router.post("/register/trainer")
-def register_trainer(trainer: TrainerCreate, db: Session = Depends(get_db)):
+@router.post("/register/trainer", response_model=TrainerSchema)
+async def register_trainer(trainer: TrainerCreate, db: Session = Depends(get_db)):
     db_trainer = db.query(Trainer).filter(Trainer.email == trainer.email).first()
     if db_trainer:
         raise HTTPException(status_code=400, detail="Email already registered")

@@ -23,7 +23,10 @@ class UserBase(BaseModel):
     last_name: Optional[str] = None
 
 class UserCreate(UserBase):
+    email: str
     password: str
+    first_name: str
+    last_name: str
     trainer_id: int
 
 class User(UserBase):
