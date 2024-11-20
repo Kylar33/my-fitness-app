@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from './contexts/AuthContext';
 import { Login } from './pages/auth/Login';
 import  Register  from './pages/auth/Register';
-import  Dashboard  from './pages/dashboard/Dashboard';
+import { Dashboard } from './pages/dashboard/Dashboard';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +17,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
