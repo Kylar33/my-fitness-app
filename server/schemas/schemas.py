@@ -1,64 +1,8 @@
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date, datetime
 
-
-class TrainerBase(BaseModel):
-    email: str
-    full_name: str
-    specialization: Optional[str] = None
-    experience_years: Optional[int] = None
-    certification: Optional[str] = None
-    biography: Optional[str] = None
-
-class TrainerCreate(TrainerBase):
-    password: str
-
-class TrainerUpdate(TrainerBase):
-    password: Optional[str] = None
-
-class Trainer(TrainerBase):
-    id: int
-    admin_id: int
-
-    class Config:
-        from_attributes = True
-
-
-class AdminBase(BaseModel):
-    email: EmailStr
-    full_name: str
-
-class AdminCreate(AdminBase):
-    password: str
-
-class AdminUpdate(AdminBase):
-    password: Optional[str] = None
-
-class Admin(AdminBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    role: str
-
-class TokenData(BaseModel):
-    email: Optional[str] = None
-    role: Optional[str] = None
-
-class AdminLoginReset(BaseModel):
-    email: EmailStr
-
-class PasswordReset(BaseModel):
-    token: str
-    new_password: str
-
-
+# Base schemas para Exercise y Meal (necesarios para otras clases)
 class ExerciseBase(BaseModel):
     name: str
     sets: int
@@ -75,23 +19,6 @@ class Exercise(ExerciseBase):
     class Config:
         from_attributes = True
 
-
-class WorkoutPlanBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-class WorkoutPlanCreate(WorkoutPlanBase):
-    exercises: List[ExerciseCreate]
-
-class WorkoutPlan(WorkoutPlanBase):
-    id: int
-    trainer_id: Optional[int] = None
-    exercises: List[Exercise] = []
-
-    class Config:
-        from_attributes = True
-
-
 class MealBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -107,7 +34,23 @@ class Meal(MealBase):
     class Config:
         from_attributes = True
 
+# Workout Plan schemas
+class WorkoutPlanBase(BaseModel):
+    name: str
+    description: Optional[str] = None
 
+class WorkoutPlanCreate(WorkoutPlanBase):
+    exercises: List[ExerciseCreate]
+
+class WorkoutPlan(WorkoutPlanBase):
+    id: int
+    trainer_id: Optional[int] = None
+    exercises: List[Exercise] = []
+
+    class Config:
+        from_attributes = True
+
+# Nutrition Plan schemas
 class NutritionPlanBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -123,7 +66,7 @@ class NutritionPlan(NutritionPlanBase):
     class Config:
         from_attributes = True
 
-
+# Routine schemas
 class RoutineBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -144,28 +87,7 @@ class Routine(RoutineBase):
     class Config:
         from_attributes = True
 
-# class PlanBase(BaseModel):
-#     name: str
-#     description: Optional[str] = None
-
-# class PlanCreate(PlanBase):
-#     trainer_id: Optional[int] = None
-
-# class PlanUpdate(PlanBase):
-#     name: Optional[str] = None
-#     description: Optional[str] = None
-#     trainer_id: Optional[int] = None
-
-# class Plan(PlanBase):
-#     id: int
-#     trainer_id: Optional[int] = None
-
-#     class Config:
-#         from_attributes = True
-
-# class PlanInDB(Plan):
-#     pass
-
+# Progress tracking schemas
 class UserMetricsBase(BaseModel):
     weight: Optional[float] = None
     body_fat: Optional[float] = None
@@ -181,7 +103,7 @@ class UserMetrics(UserMetricsBase):
     id: int
     user_id: int
     date: date
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -198,7 +120,7 @@ class WorkoutProgress(WorkoutProgressBase):
     id: int
     user_id: int
     workout_plan_id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -215,30 +137,12 @@ class NutritionProgress(NutritionProgressBase):
     id: int
     user_id: int
     nutrition_plan_id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
-class ProgressReport(BaseModel):
-    start_date: date
-    end_date: date
-    metrics: List[UserMetrics]
-    workout_progress: List[WorkoutProgress]
-    nutrition_progress: List[NutritionProgress]
-
-class UserStats(BaseModel):
-    total_workouts: int
-    completed_workouts: int
-    completion_rate: float
-    initial_weight: Optional[float]
-    current_weight: Optional[float]
-    weight_change: Optional[float]
-    initial_body_fat: Optional[float]
-    current_body_fat: Optional[float]
-    body_fat_change: Optional[float]
-
-
+# User schemas
 class UserBase(BaseModel):
     email: str
     full_name: str
@@ -259,9 +163,100 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     trainer_id: Optional[int] = None
-    metrics: List[UserMetrics] = []
-    workout_progress: List[WorkoutProgress] = []
-    nutrition_progress: List[NutritionProgress] = []
+    workout_plans: Optional[List[WorkoutPlan]] = []
+    nutrition_plans: Optional[List[NutritionPlan]] = []
+    metrics: Optional[List[UserMetrics]] = []
+    workout_progress: Optional[List[WorkoutProgress]] = []
+    nutrition_progress: Optional[List[NutritionProgress]] = []
+    created_at: datetime = Field(default_factory=datetime.now)
+
+    class Config:
+        from_attributes = True
+
+# Trainer schemas
+class TrainerBase(BaseModel):
+    email: str
+    full_name: str
+    specialization: Optional[str] = None
+    experience_years: Optional[int] = None
+    certification: Optional[str] = None
+    biography: Optional[str] = None
+
+class TrainerCreate(TrainerBase):
+    password: str
+
+class TrainerUpdate(TrainerBase):
+    password: Optional[str] = None
+
+class Trainer(TrainerBase):
+    id: int
+    admin_id: int
+    users: Optional[List[User]] = []
+    workout_plans: Optional[List[WorkoutPlan]] = []
+    nutrition_plans: Optional[List[NutritionPlan]] = []
+    routines: Optional[List[Routine]] = []
+
+    class Config:
+        from_attributes = True
+
+# Admin schemas
+class AdminBase(BaseModel):
+    email: EmailStr
+    full_name: str
+
+class AdminCreate(AdminBase):
+    password: str
+
+class AdminUpdate(AdminBase):
+    password: Optional[str] = None
+
+class Admin(AdminBase):
+    id: int
+    trainers: Optional[List[Trainer]] = []
+
+    class Config:
+        from_attributes = True
+
+# Auth schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+    role: Optional[str] = None
+
+class AdminLoginReset(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str
+
+# Response schemas
+class ProgressReport(BaseModel):
+    start_date: date
+    end_date: date
+    metrics: List[UserMetrics]
+    workout_progress: List[WorkoutProgress]
+    nutrition_progress: List[NutritionProgress]
+
+class UserStats(BaseModel):
+    total_workouts: int
+    completed_workouts: int
+    completion_rate: float
+    initial_weight: Optional[float]
+    current_weight: Optional[float]
+    weight_change: Optional[float]
+    initial_body_fat: Optional[float]
+    current_body_fat: Optional[float]
+    body_fat_change: Optional[float]
+
+# Response model específico para los planes de usuario
+class UserPlansResponse(BaseModel):
+    workout_plans: List[WorkoutPlan]
+    nutrition_plans: List[NutritionPlan]
 
     class Config:
         from_attributes = True

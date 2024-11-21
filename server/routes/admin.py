@@ -547,7 +547,9 @@ async def get_dashboard_stats(
         }
     }
 
-@router.get("/users/{user_id}/plans", response_model=dict)
+# routes/admin.py
+
+@router.get("/users/{user_id}/plans")
 async def get_user_plans(
     user_id: int,
     db: Session = Depends(get_db),
@@ -557,10 +559,46 @@ async def get_user_plans(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
+    # Cargar explícitamente las relaciones
+    workout_plans = [
+        {
+            "id": plan.id,
+            "name": plan.name,
+            "description": plan.description,
+            "exercises": [
+                {
+                    "id": exercise.id,
+                    "name": exercise.name,
+                    "sets": exercise.sets,
+                    "reps": exercise.reps
+                }
+                for exercise in plan.exercises
+            ]
+        }
+        for plan in user.workout_plans
+    ]
+    
+    nutrition_plans = [
+        {
+            "id": plan.id,
+            "name": plan.name,
+            "description": plan.description,
+            "meals": [
+                {
+                    "id": meal.id,
+                    "name": meal.name,
+                    "description": meal.description,
+                    "calories": meal.calories
+                }
+                for meal in plan.meals
+            ]
+        }
+        for plan in user.nutrition_plans
+    ]
+    
     return {
-        "workout_plans": user.workout_plans,
-        "nutrition_plans": user.nutrition_plans,
-        "routines": user.routines if hasattr(user, 'routines') else []
+        "workout_plans": workout_plans,
+        "nutrition_plans": nutrition_plans
     }
 
 @router.get("/system/health")

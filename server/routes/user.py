@@ -75,3 +75,67 @@ async def get_user_plans(
             } for plan in user.nutrition_plans
         ]
     }
+
+@router.get("/progress/", response_model=dict)
+async def get_user_progress(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user["role"] != "user":
+        raise HTTPException(status_code=403, detail="Only users can access their progress")
+    
+    user = db.query(models.User).filter(models.User.id == current_user["user"].id).first()
+    
+    return {
+        "workout_progress": user.workout_progress,
+        "nutrition_progress": user.nutrition_progress,
+        "metrics": user.metrics
+    }
+
+@router.get("/progress/stats")
+async def get_user_progress_stats(
+    range: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user["role"] != "user":
+        raise HTTPException(status_code=403, detail="Only users can access their stats")
+    
+    user = db.query(models.User).filter(models.User.id == current_user["user"].id).first()
+    
+    # Get stats based on range (month in this case)
+    if range == "month":
+        return {
+            "workout_stats": {
+                "completed_workouts": len([wp for wp in user.workout_progress if wp.completed]),
+                "total_workouts": len(user.workout_progress)
+            },
+            "nutrition_stats": {
+                "adherence_rate": len([np for np in user.nutrition_progress if np.completed]) / len(user.nutrition_progress) if user.nutrition_progress else 0
+            },
+            "metrics_progress": {
+                "weight": [metric.weight for metric in user.metrics],
+                "body_fat": [metric.body_fat for metric in user.metrics],
+                "muscle_mass": [metric.muscle_mass for metric in user.metrics]
+            }
+        }
+    
+    raise HTTPException(status_code=400, detail="Invalid range parameter")
+
+@router.get("/goals/")
+async def get_user_goals(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user["role"] != "user":
+        raise HTTPException(status_code=403, detail="Only users can access their goals")
+    
+    user = db.query(models.User).filter(models.User.id == current_user["user"].id).first()
+    
+    return {
+        "fitness_goal": user.fitness_goal,
+        "weight_goal": user.weight_goal,
+        "body_fat_goal": user.body_fat_goal,
+        "muscle_mass_goal": user.muscle_mass_goal,
+        "goal_target_date": user.goal_target_date
+    }

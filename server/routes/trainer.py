@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func, Integer
 from typing import List
 from datetime import date, datetime, timedelta
 from config.database import get_db
@@ -415,8 +416,7 @@ async def get_trainer_stats(
         models.User.trainer_id == trainer_id,
         models.WorkoutProgress.date >= thirty_days_ago
     ).with_entities(
-        db.func.avg(models.WorkoutProgress.completed.cast(db.Integer)) * 100
-    ).scalar() or 0
+        func.avg(models.WorkoutProgress.completed.cast(Integer)) * 100    ).scalar() or 0
 
     nutrition_completion = db.query(
         models.NutritionProgress
@@ -426,8 +426,7 @@ async def get_trainer_stats(
         models.User.trainer_id == trainer_id,
         models.NutritionProgress.date >= thirty_days_ago
     ).with_entities(
-        db.func.avg(models.NutritionProgress.completed.cast(db.Integer)) * 100
-    ).scalar() or 0
+        func.avg(models.NutritionProgress.completed.cast(Integer)) * 100    ).scalar() or 0
 
     return {
         "total_stats": {
