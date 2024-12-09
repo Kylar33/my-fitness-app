@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import List
 from routes import admin, trainer, user, metrics, progress
+from routes.goals import router as goals_router
 from config.database import get_db, engine, SessionLocal
 import models.models as models
 import schemas.schemas as schemas
@@ -129,3 +130,4 @@ app.include_router(trainer.router)
 app.include_router(user.router)
 app.include_router(metrics.router)
 app.include_router(progress.router)
+app.include_router(goals_router)

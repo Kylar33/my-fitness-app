@@ -61,7 +61,7 @@ async def get_current_user(
     
     if user is None:
         raise credentials_exception
-    return {"user": user, "role": role}
+    return {"user": user, "role": role, "email": email}
 
 async def get_current_admin(current_user = Depends(get_current_user)):
     if current_user["role"] != "admin":

@@ -144,17 +144,28 @@ class NutritionProgress(NutritionProgressBase):
 
 # User schemas
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     full_name: str
     height: Optional[float] = None
     target_weight: Optional[float] = None
     fitness_goal: Optional[str] = None
     health_conditions: Optional[str] = None
     emergency_contact: Optional[str] = None
+    
+    # Campos de objetivos
+    weight_goal: Optional[float] = None
+    body_fat_goal: Optional[float] = None
+    muscle_mass_goal: Optional[float] = None
+    activity_level_goal: Optional[int] = None
+    calories_goal: Optional[int] = None
+    protein_goal: Optional[int] = None
+    carbs_goal: Optional[int] = None
+    fat_goal: Optional[int] = None
+    water_goal: Optional[float] = None
+    steps_goal: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str
-    trainer_id: Optional[int] = None
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
@@ -163,12 +174,7 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     trainer_id: Optional[int] = None
-    workout_plans: Optional[List[WorkoutPlan]] = []
-    nutrition_plans: Optional[List[NutritionPlan]] = []
-    metrics: Optional[List[UserMetrics]] = []
-    workout_progress: Optional[List[WorkoutProgress]] = []
-    nutrition_progress: Optional[List[NutritionProgress]] = []
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -260,3 +266,44 @@ class UserPlansResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserGoals(BaseModel):
+    weight_goal: Optional[float] = Field(None, description="Objetivo de peso en kg")
+    body_fat_goal: Optional[float] = Field(None, description="Objetivo de porcentaje de grasa corporal")
+    muscle_mass_goal: Optional[float] = Field(None, description="Objetivo de masa muscular en kg")
+    activity_level_goal: Optional[int] = Field(None, description="Días de actividad por semana")
+    calories_goal: Optional[int] = Field(None, description="Objetivo de calorías diarias")
+    protein_goal: Optional[int] = Field(None, description="Objetivo de proteínas en gramos")
+    carbs_goal: Optional[int] = Field(None, description="Objetivo de carbohidratos en gramos")
+    fat_goal: Optional[int] = Field(None, description="Objetivo de grasas en gramos")
+    water_goal: Optional[float] = Field(None, description="Objetivo de consumo de agua en litros")
+    steps_goal: Optional[int] = Field(None, description="Objetivo de pasos diarios")
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "weight_goal": 75.5,
+                "body_fat_goal": 15.0,
+                "muscle_mass_goal": 65.0,
+                "activity_level_goal": 5,
+                "calories_goal": 2500,
+                "protein_goal": 180,
+                "carbs_goal": 300,
+                "fat_goal": 80,
+                "water_goal": 3.5,
+                "steps_goal": 10000
+            }
+        }
+
+class UserGoalsUpdate(BaseModel):
+    weight_goal: Optional[float] = None
+    body_fat_goal: Optional[float] = None
+    muscle_mass_goal: Optional[float] = None
+    activity_level_goal: Optional[int] = None
+    calories_goal: Optional[int] = None
+    protein_goal: Optional[int] = None
+    carbs_goal: Optional[int] = None
+    fat_goal: Optional[int] = None
+    water_goal: Optional[float] = None
+    steps_goal: Optional[int] = None

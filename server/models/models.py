@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text, Table, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -50,31 +51,36 @@ class Trainer(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True)
-    hashed_password = Column(String(255))
-    full_name = Column(String(255))
-    height = Column(Float)
-    target_weight = Column(Float)
-    fitness_goal = Column(Text)
-    health_conditions = Column(Text)
-    emergency_contact = Column(String(255))
-    trainer_id = Column(Integer, ForeignKey("trainers.id"))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    hashed_password = Column(String)
+    height = Column(Float, nullable=True)
+    target_weight = Column(Float, nullable=True)
+    fitness_goal = Column(String, nullable=True)
+    health_conditions = Column(String, nullable=True)
+    emergency_contact = Column(String, nullable=True)
+    trainer_id = Column(Integer, ForeignKey("trainers.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Campos de objetivos
+    weight_goal = Column(Float, nullable=True)
+    body_fat_goal = Column(Float, nullable=True)
+    muscle_mass_goal = Column(Float, nullable=True)
+    activity_level_goal = Column(Integer, nullable=True)
+    calories_goal = Column(Integer, nullable=True)
+    protein_goal = Column(Integer, nullable=True)
+    carbs_goal = Column(Integer, nullable=True)
+    fat_goal = Column(Integer, nullable=True)
+    water_goal = Column(Float, nullable=True)
+    steps_goal = Column(Integer, nullable=True)
+
+    # Relaciones
     trainer = relationship("Trainer", back_populates="users")
-    workout_plans = relationship(
-        "WorkoutPlan",
-        secondary=user_workout_plans,
-        back_populates="users"
-    )
-    nutrition_plans = relationship(
-        "NutritionPlan",
-        secondary=user_nutrition_plans,
-        back_populates="users"
-    )
-    metrics = relationship("UserMetrics", back_populates="user", cascade="all, delete-orphan")
-    workout_progress = relationship("WorkoutProgress", back_populates="user", cascade="all, delete-orphan")
-    nutrition_progress = relationship("NutritionProgress", back_populates="user", cascade="all, delete-orphan")
+    workout_plans = relationship("WorkoutPlan", secondary="user_workout_plans", back_populates="users")
+    nutrition_plans = relationship("NutritionPlan", secondary="user_nutrition_plans", back_populates="users")
+    metrics = relationship("UserMetrics", back_populates="user")
+    workout_progress = relationship("WorkoutProgress", back_populates="user")
+    nutrition_progress = relationship("NutritionProgress", back_populates="user")
 
 class WorkoutPlan(Base):
     __tablename__ = "workout_plans"

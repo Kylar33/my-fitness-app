@@ -121,6 +121,58 @@ def delete_user(
     db.commit()
     return {"message": "Usuario eliminado exitosamente"}
 
+@router.get("/users/{user_id}/workout-plans/", response_model=List[schemas.WorkoutPlan])
+def read_user_workout_plans(
+        user_id: int,
+        current_user = Depends(get_current_trainer),
+        db: Session = Depends(get_db)
+    ):
+        db_user = db.query(models.User).filter(
+            models.User.id == user_id,
+            models.User.trainer_id == current_user["user"].id
+        ).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Return the workout plans through the relationship
+        return db_user.workout_plans
+
+
+@router.get("/users/{user_id}/nutritional-plans/", response_model=List[schemas.NutritionPlan])
+def read_user_nutritional_plans(
+        user_id: int,
+        current_user = Depends(get_current_trainer),
+        db: Session = Depends(get_db)
+    ):
+        db_user = db.query(models.User).filter(
+            models.User.id == user_id,
+            models.User.trainer_id == current_user["user"].id
+        ).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Return the nutritional plans through the relationship
+        return db_user.nutrition_plans
+
+@router.get("/metrics/user/{user_id}/metrics")
+def get_user_metrics(
+    user_id: int,
+    current_user = Depends(get_current_trainer),
+    db: Session = Depends(get_db)
+):
+    db_user = db.query(models.User).filter(
+        models.User.id == user_id,
+        models.User.trainer_id == current_user["user"].id
+    ).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Assuming there is a method to get metrics for the user
+    metrics = db_user.get_metrics()  # This method should be defined in the User model
+    return metrics
+
+
+
 # Workout Plans Management
 @router.get("/workout-plans/", response_model=List[schemas.WorkoutPlan])
 def read_workout_plans(
@@ -514,6 +566,8 @@ async def assign_nutrition_plan(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
 @router.delete("/unassign-workout/{user_id}/{plan_id}")
 async def unassign_workout_plan(
     user_id: int,
@@ -622,4 +676,33 @@ async def get_user_statistics(
         "progress_stats": progress_stats,
         "total_workout_plans": len(user.workout_plans),
         "total_nutrition_plans": len(user.nutrition_plans)
+    }
+
+@router.get("/user/goals/{user_id}", response_model=schemas.UserGoals)
+async def get_goals_by_user_id(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_trainer)
+):
+    """
+    Obtener los objetivos del usuario por ID
+    """
+    # Verificar si el usuario existe
+    user = db.query(models.User).filter(
+        models.User.id == user_id
+    ).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return {
+        "weight_goal": user.weight_goal,
+        "body_fat_goal": user.body_fat_goal,
+        "muscle_mass_goal": user.muscle_mass_goal,
+        "activity_level_goal": user.activity_level_goal,
+        "calories_goal": user.calories_goal,
+        "protein_goal": user.protein_goal,
+        "carbs_goal": user.carbs_goal,
+        "fat_goal": user.fat_goal,
+        "water_goal": user.water_goal,
+        "steps_goal": user.steps_goal
     }

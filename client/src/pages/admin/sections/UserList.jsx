@@ -27,10 +27,14 @@ export default function UserList({ onEdit }) {
     }
   });
 
-  if (isLoading) return <div>Cargando...</div>;
+  if (isLoading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+    </div>
+  );
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       {showPlans ? (
         <div>
           <button
@@ -83,13 +87,13 @@ export default function UserList({ onEdit }) {
                         setSelectedUser(user);
                         setShowAssignModal(true);
                       }}
-                      className="text-green-600 hover:text-green-900 mr-4"
+                      className="text-green-500 hover:text-green-600 mr-4"
                     >
                       Asignar Planes
                     </button>
                     <button
                       onClick={() => onEdit(user)}
-                      className="text-yellow-600 hover:text-yellow-900 mr-4"
+                      className="text-yellow-500 hover:text-yellow-600 mr-4"
                     >
                       Editar
                     </button>
@@ -99,7 +103,7 @@ export default function UserList({ onEdit }) {
                           deleteMutation.mutate(user.id);
                         }
                       }}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-500 hover:text-red-600"
                     >
                       Eliminar
                     </button>
